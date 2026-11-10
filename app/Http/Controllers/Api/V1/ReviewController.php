@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Data\AttemptData;
+use App\Data\ReviewSummaryData;
 use App\Models\ReviewItem;
 use App\Services\AttemptService;
 use Illuminate\Http\JsonResponse;
@@ -14,19 +15,22 @@ class ReviewController
 
     public function summary(Request $request): JsonResponse
     {
-        $userId = $request->user()->id;
+        $now = now();
 
-        $next = ReviewItem::where('user_id', $userId)
-            ->where('due_at', '>', now())
-            ->min('due_at');
+        $counts = ReviewItem::query()
+            ->where('user_id', $request->user()->id)
+            ->selectRaw('count(*) as tracked_count')
+            ->selectRaw('count(*) filter (where due_at <= ?) as due_count', [$now])
+            ->selectRaw('min(due_at) filter (where due_at > ?) as next_due_at', [$now])
+            ->first();
 
         return response()->json([
-            'data' => [
-                'dueCount' => $this->attempts->dueReviewCount($request->user()),
-                'trackedCount' => ReviewItem::where('user_id', $userId)->count(),
-                'nextDueAt' => $next === null ? null : now()->parse($next)->toIso8601String(),
-                'sessionSize' => AttemptService::REVIEW_SESSION_SIZE,
-            ],
+            'data' => new ReviewSummaryData(
+                dueCount: (int) $counts->due_count,
+                trackedCount: (int) $counts->tracked_count,
+                nextDueAt: $counts->next_due_at === null ? null : $now->parse($counts->next_due_at)->toIso8601String(),
+                sessionSize: AttemptService::REVIEW_SESSION_SIZE,
+            ),
         ]);
     }
 

@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\UserJourneyProgress;
 use App\Services\AttemptService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class ReviewSessionTest extends TestCase
@@ -89,6 +90,22 @@ class ReviewSessionTest extends TestCase
             ->assertJsonPath('data.dueCount', 0)
             ->assertJsonPath('data.trackedCount', 0)
             ->assertJsonPath('data.nextDueAt', null);
+    }
+
+    public function test_the_summary_reads_the_review_queue_in_one_query(): void
+    {
+        $this->dueQuestion('q-a', '-2 hours');
+        $this->dueQuestion('q-b', '+3 days');
+
+        $this->actingAs($this->user);
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+        $this->getJson('/api/v1/review')->assertOk();
+        $queries = collect(DB::getQueryLog())->pluck('query')->filter(fn (string $q) => str_contains($q, 'review_items'));
+        DB::disableQueryLog();
+
+        $this->assertCount(1, $queries, 'the summary must aggregate the queue in a single query: '.$queries->implode(' | '));
     }
 
     public function test_starting_a_session_with_nothing_due_is_refused(): void
