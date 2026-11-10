@@ -4,12 +4,14 @@ namespace App\Services;
 
 use App\Data\AnswerResultData;
 use App\Data\AttemptResultData;
+use App\Models\Journey;
 use App\Models\Question;
 use App\Models\QuestionOption;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Models\QuizAttemptAnswer;
 use App\Models\QuizAttemptQuestion;
+use App\Models\ReviewItem;
 use App\Models\User;
 use App\Models\UserJourneyProgress;
 use App\Models\UserXpEvent;
@@ -19,9 +21,12 @@ use Illuminate\Validation\ValidationException;
 
 class AttemptService
 {
+    public const REVIEW_SESSION_SIZE = 10;
+
     public function __construct(
         private readonly ReviewScheduler $reviews,
         private readonly StreakTracker $streaks,
+        private readonly JourneyUnlock $unlock,
     ) {}
 
     public function startOrResume(User $user, Quiz $quiz, string $locale): QuizAttempt
@@ -47,6 +52,8 @@ class AttemptService
 
     private function create(User $user, Quiz $quiz, string $locale): QuizAttempt
     {
+        $this->assertUnlocked($user, $quiz);
+
         $questions = $quiz->questions()
             ->active()
             ->with([
@@ -89,6 +96,95 @@ class AttemptService
             ['user_id' => $user->id, 'journey_id' => $quiz->journey_id],
             [],
         )->fill(['status' => 'in_progress'])->save();
+
+        return $attempt;
+    }
+
+    private function assertUnlocked(User $user, Quiz $quiz): void
+    {
+        $journey = $quiz->journey;
+
+        $siblings = Journey::where('track_id', $journey->track_id)
+            ->where('is_published', true)
+            ->orderBy('position')
+            ->get();
+
+        $progress = UserJourneyProgress::where('user_id', $user->id)
+            ->whereIn('journey_id', $siblings->pluck('id'))
+            ->get()
+            ->keyBy('journey_id');
+
+        if (! $this->unlock->isUnlocked($journey, $siblings, $progress)) {
+            throw ValidationException::withMessages([
+                'journey' => 'Finish the journey before this one first.',
+            ]);
+        }
+    }
+
+    public function dueReviewCount(User $user): int
+    {
+        return ReviewItem::where('user_id', $user->id)->due()->count();
+    }
+
+    public function startOrResumeReview(User $user, string $locale): QuizAttempt
+    {
+        $existing = QuizAttempt::where('user_id', $user->id)
+            ->ofKind('review')
+            ->inProgress()
+            ->first();
+
+        if ($existing !== null) {
+            return $existing;
+        }
+
+        try {
+            return DB::transaction(fn () => $this->createReview($user, $locale));
+        } catch (UniqueConstraintViolationException) {
+            return QuizAttempt::where('user_id', $user->id)
+                ->ofKind('review')
+                ->inProgress()
+                ->sole();
+        }
+    }
+
+    private function createReview(User $user, string $locale): QuizAttempt
+    {
+        $questions = Question::query()
+            ->active()
+            ->join('review_items as r', 'r.question_id', '=', 'questions.id')
+            ->where('r.user_id', $user->id)
+            ->where('r.due_at', '<=', now())
+            ->orderBy('r.due_at')
+            ->orderBy('questions.id')
+            ->limit(self::REVIEW_SESSION_SIZE)
+            ->select('questions.*')
+            ->with(['currentVersion.translations', 'currentVersion.options.translations'])
+            ->get();
+
+        if ($questions->isEmpty()) {
+            throw ValidationException::withMessages([
+                'review' => 'Nothing is due for review right now.',
+            ]);
+        }
+
+        $attempt = QuizAttempt::create([
+            'user_id' => $user->id,
+            'quiz_id' => null,
+            'kind' => 'review',
+            'status' => 'in_progress',
+            'locale' => $locale,
+            'question_count' => $questions->count(),
+            'started_at' => now(),
+        ]);
+
+        foreach ($questions->values() as $position => $question) {
+            QuizAttemptQuestion::create([
+                'quiz_attempt_id' => $attempt->id,
+                'question_version_id' => $question->current_version_id,
+                'position' => $position,
+                'snapshot' => $this->snapshot($question, true, $locale),
+            ]);
+        }
 
         return $attempt;
     }
@@ -210,16 +306,15 @@ class AttemptService
         }
 
         $user = $attempt->user;
-        $journey = $attempt->quiz->journey;
+        $journey = $attempt->isReview() ? null : $attempt->quiz->journey;
         $correct = $served->filter(fn (QuizAttemptQuestion $row) => $row->answer->is_correct);
         $score = (int) round($correct->count() / max(1, $served->count()) * 100);
-        $passed = $score >= $journey->pass_threshold;
 
         $xpEarned = $correct->sum(fn (QuizAttemptQuestion $row) => $row->questionVersion->question->xpValue());
         $scheduled = [];
 
         DB::transaction(function () use (
-            $attempt, $served, $correct, $score, $passed, $xpEarned, $user, $journey, &$scheduled
+            $attempt, $served, $correct, $score, $xpEarned, $user, $journey, &$scheduled
         ) {
             $attempt->forceFill([
                 'status' => 'submitted',
@@ -258,25 +353,34 @@ class AttemptService
                 $user->increment('xp_total', $xpEarned);
             }
 
-            $progress = UserJourneyProgress::firstOrNew([
-                'user_id' => $user->id,
-                'journey_id' => $journey->id,
-            ]);
+            if ($journey !== null) {
+                $passed = $score >= $journey->pass_threshold;
 
-            $progress->fill([
-                'attempts_count' => $progress->attempts_count + 1,
-                'best_score' => max($progress->best_score ?? 0, $score),
-                'status' => $passed || $progress->status === 'completed' ? 'completed' : 'in_progress',
-                'completed_at' => $passed ? ($progress->completed_at ?? now()) : $progress->completed_at,
-            ])->save();
+                $progress = UserJourneyProgress::firstOrNew([
+                    'user_id' => $user->id,
+                    'journey_id' => $journey->id,
+                ]);
+
+                $progress->fill([
+                    'attempts_count' => $progress->attempts_count + 1,
+                    'best_score' => max($progress->best_score ?? 0, $score),
+                    'status' => $passed || $progress->status === 'completed' ? 'completed' : 'in_progress',
+                    'completed_at' => $passed ? ($progress->completed_at ?? now()) : $progress->completed_at,
+                ])->save();
+            }
 
             $this->streaks->record($user, $served->count(), $correct->count(), $xpEarned);
         });
 
         $user->refresh();
-        $journeyStatus = UserJourneyProgress::where('user_id', $user->id)
+
+        $journeyStatus = $journey === null ? null : UserJourneyProgress::where('user_id', $user->id)
             ->where('journey_id', $journey->id)
             ->value('status');
+
+        $passed = $journey === null
+            ? $scheduled === []
+            : $score >= $journey->pass_threshold;
 
         return new AttemptResultData(
             score: $score,
@@ -286,7 +390,7 @@ class AttemptService
             xpEarned: $xpEarned,
             xpTotal: $user->xp_total,
             currentStreak: $user->current_streak,
-            journeyStatus: (string) $journeyStatus,
+            journeyStatus: $journeyStatus === null ? null : (string) $journeyStatus,
             scheduledForReview: $scheduled,
         );
     }
