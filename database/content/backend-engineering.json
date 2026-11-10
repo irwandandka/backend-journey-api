@@ -1,0 +1,434 @@
+{
+  "roadmap": {
+    "slug": "backend-engineering",
+    "position": 1,
+    "is_published": true,
+    "translations": {
+      "en": { "title": "Backend Engineering", "description": "Tracks covering the parts of backend work that break in production." },
+      "id": { "title": "Backend Engineering", "description": "Kumpulan track yang membahas bagian backend yang paling sering jebol di produksi." }
+    }
+  },
+  "tags": [
+    { "slug": "postgres", "name": "PostgreSQL" },
+    { "slug": "indexing", "name": "Indexing" },
+    { "slug": "query-plans", "name": "Query plans" },
+    { "slug": "concurrency", "name": "Concurrency" },
+    { "slug": "locking", "name": "Locking" },
+    { "slug": "redis", "name": "Redis" },
+    { "slug": "cache-stampede", "name": "Cache stampede" }
+  ],
+  "tracks": [
+    {
+      "slug": "http-api-design",
+      "abbreviation": "HT",
+      "color_dark": "#FFC53D",
+      "color_light": "#B45309",
+      "position": 1,
+      "is_published": true,
+      "translations": {
+        "en": { "name": "HTTP & API Design" },
+        "id": { "name": "HTTP & Desain API" }
+      },
+      "journeys": [
+        {
+          "slug": "status-codes-that-mean-something",
+          "tier": "foundation",
+          "position": 1,
+          "translations": { "en": { "title": "Status Codes That Mean Something" } }
+        },
+        {
+          "slug": "idempotent-requests",
+          "tier": "intermediate",
+          "position": 2,
+          "translations": { "en": { "title": "Idempotent Requests" } }
+        }
+      ]
+    },
+    {
+      "slug": "data-modeling",
+      "abbreviation": "DM",
+      "color_dark": "#FF4FD8",
+      "color_light": "#A21CAF",
+      "position": 2,
+      "is_published": true,
+      "translations": {
+        "en": { "name": "Data Modeling" },
+        "id": { "name": "Pemodelan Data" }
+      },
+      "journeys": [
+        {
+          "slug": "normal-forms-in-practice",
+          "tier": "foundation",
+          "position": 1,
+          "translations": { "en": { "title": "Normal Forms in Practice" } }
+        },
+        {
+          "slug": "soft-deletes-and-their-cost",
+          "tier": "intermediate",
+          "position": 2,
+          "translations": { "en": { "title": "Soft Deletes and Their Cost" } }
+        }
+      ]
+    },
+    {
+      "slug": "indexing-query-plans",
+      "abbreviation": "IX",
+      "color_dark": "#00E5FF",
+      "color_light": "#0E7490",
+      "position": 3,
+      "is_published": true,
+      "translations": {
+        "en": { "name": "Indexing & Query Plans", "description": "How the planner actually chooses, and why your index is ignored." },
+        "id": { "name": "Indexing & Query Plan", "description": "Cara planner benar-benar memilih, dan kenapa index kamu diabaikan." }
+      },
+      "journeys": [
+        {
+          "slug": "b-tree-internals",
+          "tier": "foundation",
+          "position": 1,
+          "translations": { "en": { "title": "B-Tree Internals" }, "id": { "title": "Isi Dalam B-Tree" } }
+        },
+        {
+          "slug": "reading-explain",
+          "tier": "foundation",
+          "position": 2,
+          "translations": { "en": { "title": "Reading EXPLAIN" }, "id": { "title": "Membaca EXPLAIN" } },
+          "quiz": {
+            "slug": "reading-explain-core",
+            "question_count": 1,
+            "translations": { "en": { "title": "Reading EXPLAIN" }, "id": { "title": "Membaca EXPLAIN" } },
+            "questions": ["q-explain-loops"]
+          }
+        },
+        {
+          "slug": "composite-index-order",
+          "tier": "foundation",
+          "position": 3,
+          "translations": { "en": { "title": "Composite Index Order" }, "id": { "title": "Urutan Kolom Index Komposit" } },
+          "quiz": {
+            "slug": "composite-index-order-core",
+            "question_count": 2,
+            "translations": { "en": { "title": "Composite Index Order" }, "id": { "title": "Urutan Kolom Index Komposit" } },
+            "questions": ["q-composite-index-order", "q-explain-loops"]
+          }
+        },
+        {
+          "slug": "covering-and-index-only-scans",
+          "tier": "intermediate",
+          "position": 4,
+          "translations": { "en": { "title": "Covering & Index-Only Scans" } }
+        },
+        {
+          "slug": "partial-and-expression-indexes",
+          "tier": "intermediate",
+          "position": 5,
+          "translations": { "en": { "title": "Partial & Expression Indexes" } }
+        },
+        {
+          "slug": "gin-gist-and-jsonb",
+          "tier": "advanced",
+          "position": 6,
+          "translations": { "en": { "title": "GIN, GiST and JSONB" } }
+        },
+        {
+          "slug": "planner-cost-tuning",
+          "tier": "deep",
+          "position": 7,
+          "translations": { "en": { "title": "Planner Cost Tuning" } }
+        }
+      ]
+    },
+    {
+      "slug": "transactions-isolation",
+      "abbreviation": "TX",
+      "color_dark": "#9D5CFF",
+      "color_light": "#6D28D9",
+      "position": 4,
+      "is_published": true,
+      "translations": {
+        "en": { "name": "Transactions & Isolation" },
+        "id": { "name": "Transaksi & Isolation" }
+      },
+      "journeys": [
+        {
+          "slug": "lost-updates",
+          "tier": "foundation",
+          "position": 1,
+          "translations": { "en": { "title": "Lost Updates" }, "id": { "title": "Lost Update" } },
+          "quiz": {
+            "slug": "lost-updates-core",
+            "question_count": 1,
+            "translations": { "en": { "title": "Lost Updates" }, "id": { "title": "Lost Update" } },
+            "questions": ["q-lost-update"]
+          }
+        },
+        {
+          "slug": "serializable-and-retries",
+          "tier": "advanced",
+          "position": 2,
+          "translations": { "en": { "title": "Serializable and Retries" } }
+        }
+      ]
+    },
+    {
+      "slug": "caching-invalidation",
+      "abbreviation": "CA",
+      "color_dark": "#FF9A2E",
+      "color_light": "#C2410C",
+      "position": 5,
+      "is_published": true,
+      "translations": {
+        "en": { "name": "Caching & Invalidation" },
+        "id": { "name": "Caching & Invalidasi" }
+      },
+      "journeys": [
+        {
+          "slug": "cache-stampede",
+          "tier": "intermediate",
+          "position": 1,
+          "translations": { "en": { "title": "Cache Stampede" }, "id": { "title": "Cache Stampede" } },
+          "quiz": {
+            "slug": "cache-stampede-core",
+            "question_count": 1,
+            "translations": { "en": { "title": "Cache Stampede" }, "id": { "title": "Cache Stampede" } },
+            "questions": ["q-cache-stampede"]
+          }
+        },
+        {
+          "slug": "write-through-vs-write-behind",
+          "tier": "advanced",
+          "position": 2,
+          "translations": { "en": { "title": "Write-Through vs Write-Behind" } }
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "key": "q-composite-index-order",
+      "track": "indexing-query-plans",
+      "type": "single_choice",
+      "difficulty": "medium",
+      "tags": ["postgres", "indexing"],
+      "translations": {
+        "en": {
+          "stem_md": "You have `CREATE INDEX idx ON bookings (status, created_at)`. Which query can use that index for the filter **and** the sort, with no separate sort step?",
+          "explanation_md": "Leftmost prefix rule: a composite index is only usable left to right, with no gaps."
+        },
+        "id": {
+          "stem_md": "Kamu punya index `CREATE INDEX idx ON bookings (status, created_at)`. Query mana yang bisa memakai index itu untuk filter **dan** sort sekaligus, tanpa langkah sort terpisah?",
+          "explanation_md": "Leftmost prefix rule: index komposit hanya berguna dari kolom paling kiri ke kanan, tanpa bolong."
+        }
+      },
+      "options": [
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "`WHERE created_at > '2026-01-01' ORDER BY status`", "option_explanation_md": "The leading column is skipped, so the index is only reachable through a full index scan." },
+            "id": { "label_md": "`WHERE created_at > '2026-01-01' ORDER BY status`", "option_explanation_md": "Kolom paling kiri dilewati, jadi index hanya bisa dipakai lewat full index scan." }
+          }
+        },
+        {
+          "is_correct": true,
+          "translations": {
+            "en": { "label_md": "`WHERE status = 'pending' ORDER BY created_at DESC`", "option_explanation_md": "One value on the first column, then ordered by the second. The index is already in that order, and a backward scan is free." },
+            "id": { "label_md": "`WHERE status = 'pending' ORDER BY created_at DESC`", "option_explanation_md": "Satu nilai di kolom pertama, lalu urut di kolom kedua. Index sudah terurut begitu, backward scan pun gratis." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "`WHERE status IN ('pending','paid') ORDER BY created_at`", "option_explanation_md": "Two status values means two separately ordered ranges. The planner still has to merge or sort." },
+            "id": { "label_md": "`WHERE status IN ('pending','paid') ORDER BY created_at`", "option_explanation_md": "Dua nilai status berarti dua rentang terurut terpisah. Planner masih harus merge atau sort." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "`ORDER BY created_at, status` with no WHERE", "option_explanation_md": "Column order is reversed from the index, and there is no filter." },
+            "id": { "label_md": "`ORDER BY created_at, status` tanpa WHERE", "option_explanation_md": "Urutan kolom kebalik dari index, dan tanpa filter." }
+          }
+        }
+      ]
+    },
+    {
+      "key": "q-explain-loops",
+      "track": "indexing-query-plans",
+      "type": "single_choice",
+      "difficulty": "hard",
+      "code_language": "text",
+      "tags": ["postgres", "query-plans"],
+      "translations": {
+        "en": {
+          "stem_md": "`EXPLAIN ANALYZE` on a report page produces this. What does it tell you?",
+          "code_snippet": "-> Nested Loop  (actual time=0.004..214.9 rows=8412 loops=1)\n      -> Seq Scan on bookings  (rows=8412 loops=1)\n      -> Index Scan using users_pkey  (rows=1 loops=8412)",
+          "explanation_md": "The first thing to read in EXPLAIN is not cost, it is loops and the gap between estimated and actual rows."
+        },
+        "id": {
+          "stem_md": "`EXPLAIN ANALYZE` sebuah halaman laporan mengeluarkan baris ini. Apa artinya?",
+          "code_snippet": "-> Nested Loop  (actual time=0.004..214.9 rows=8412 loops=1)\n      -> Seq Scan on bookings  (rows=8412 loops=1)\n      -> Index Scan using users_pkey  (rows=1 loops=8412)",
+          "explanation_md": "Yang dibaca pertama di EXPLAIN bukan cost, tapi loops dan selisih estimated vs actual rows."
+        }
+      },
+      "options": [
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "The `users_pkey` index is unused and needs a `REINDEX`", "option_explanation_md": "The index is being used. The problem is how many times it is called." },
+            "id": { "label_md": "Index `users_pkey` tidak terpakai dan perlu di-`REINDEX`", "option_explanation_md": "Index justru terpakai. Masalahnya berapa kali dia dipanggil." }
+          }
+        },
+        {
+          "is_correct": true,
+          "translations": {
+            "en": { "label_md": "A nested loop doing one lookup per outer row — an N+1 that moved into the planner", "option_explanation_md": "`loops=8412` means that index scan ran 8,412 times. Correct result, expensive total." },
+            "id": { "label_md": "Nested loop yang menjalankan satu lookup per baris outer — N+1 yang pindah ke dalam planner", "option_explanation_md": "`loops=8412` artinya index scan itu dieksekusi 8.412 kali. Benar hasilnya, mahal totalnya." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "Stale table statistics, needs an `ANALYZE`", "option_explanation_md": "A reasonable distractor, but estimated and actual rows match here." },
+            "id": { "label_md": "Statistik tabel basi, perlu `ANALYZE`", "option_explanation_md": "Distraktor yang masuk akal, tapi estimasi dan actual rows di sini cocok." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "The `bookings` table is missing an index on its foreign key", "option_explanation_md": "The seq scan on bookings is intentional, since every row is needed." },
+            "id": { "label_md": "Tabel `bookings` kekurangan index pada foreign key", "option_explanation_md": "Seq scan pada bookings disengaja karena semua baris dibutuhkan." }
+          }
+        }
+      ]
+    },
+    {
+      "key": "q-lost-update",
+      "track": "transactions-isolation",
+      "type": "single_choice",
+      "difficulty": "hard",
+      "code_language": "sql",
+      "tags": ["postgres", "concurrency", "locking"],
+      "translations": {
+        "en": {
+          "stem_md": "Two workers run this block at the same time on PostgreSQL at the default `READ COMMITTED`. Balance starts at 100, both deduct 50. What is the final balance?",
+          "code_snippet": "BEGIN;\nSELECT balance FROM wallets WHERE id = 7;   -- reads 100\n-- app computes: 100 - 50 = 50\nUPDATE wallets SET balance = 50 WHERE id = 7;\nCOMMIT;",
+          "explanation_md": "Three fixes: `SELECT ... FOR UPDATE`, an atomic `SET balance = balance - 50`, or a `version` column for optimistic locking."
+        },
+        "id": {
+          "stem_md": "Dua worker menjalankan blok ini bersamaan di PostgreSQL dengan isolation default `READ COMMITTED`. Saldo awal 100, keduanya memotong 50. Berapa saldo akhirnya?",
+          "code_snippet": "BEGIN;\nSELECT balance FROM wallets WHERE id = 7;   -- baca 100\n-- aplikasi menghitung: 100 - 50 = 50\nUPDATE wallets SET balance = 50 WHERE id = 7;\nCOMMIT;",
+          "explanation_md": "Perbaikannya ada tiga: `SELECT ... FOR UPDATE`, `SET balance = balance - 50` yang atomik, atau kolom `version` untuk optimistic locking."
+        }
+      },
+      "options": [
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "0 — both deductions land", "option_explanation_md": "That is what you expect, not what happens." },
+            "id": { "label_md": "0 — kedua pemotongan masuk", "option_explanation_md": "Itu yang kamu harapkan, bukan yang terjadi." }
+          }
+        },
+        {
+          "is_correct": true,
+          "translations": {
+            "en": { "label_md": "50 — the second transaction overwrites with a value computed from stale data", "option_explanation_md": "A lost update. Both read 100, both write 50. One deduction vanishes with no error." },
+            "id": { "label_md": "50 — transaksi kedua menimpa dengan nilai hasil hitungan data basi", "option_explanation_md": "Lost update. Keduanya membaca 100, keduanya menulis 50. Satu pemotongan hilang tanpa error." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "The second transaction fails with a serialization error", "option_explanation_md": "That is `REPEATABLE READ` or `SERIALIZABLE` behaviour." },
+            "id": { "label_md": "Transaksi kedua gagal dengan serialization error", "option_explanation_md": "Itu perilaku `REPEATABLE READ` atau `SERIALIZABLE`." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "100 — Postgres rolls both back", "option_explanation_md": "No conflict is detected, so nothing is rolled back." },
+            "id": { "label_md": "100 — Postgres me-rollback keduanya", "option_explanation_md": "Tidak ada konflik yang terdeteksi, jadi tidak ada yang di-rollback." }
+          }
+        }
+      ]
+    },
+    {
+      "key": "q-cache-stampede",
+      "track": "caching-invalidation",
+      "type": "single_choice",
+      "difficulty": "medium",
+      "tags": ["redis", "cache-stampede"],
+      "translations": {
+        "en": {
+          "stem_md": "The `/api/v1/leaderboard` response is cached in Redis for 60 seconds. At a peak of 4,000 req/s, the moment the key expires database CPU pins at 100% for two seconds. Which fix is right?",
+          "explanation_md": "Three patterns worth memorising: a lock around the rebuild, refresh-ahead before expiry, and jittered TTLs so keys do not expire in lockstep."
+        },
+        "id": {
+          "stem_md": "Endpoint `/api/v1/leaderboard` di-cache 60 detik di Redis. Saat puncak 4.000 req/s, tepat ketika key expire, CPU database melonjak 100% selama dua detik. Perbaikan mana yang benar?",
+          "explanation_md": "Tiga pola yang perlu dihafal: lock saat rebuild, refresh-ahead sebelum expire, dan TTL yang di-jitter supaya key tidak expire serempak."
+        }
+      },
+      "options": [
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "Drop the TTL to 10 seconds so the data stays fresher", "option_explanation_md": "That makes it worse: a stampede every 10 seconds instead of every 60." },
+            "id": { "label_md": "Turunkan TTL jadi 10 detik supaya datanya lebih segar", "option_explanation_md": "Memperparah: stampede yang tadinya tiap 60 detik jadi tiap 10 detik." }
+          }
+        },
+        {
+          "is_correct": true,
+          "translations": {
+            "en": { "label_md": "Add a short lock — one request rebuilds the value while the rest serve the stale copy", "option_explanation_md": "This is a cache stampede, and the cure is letting exactly one rebuild through. Redis `SET NX EX` is enough." },
+            "id": { "label_md": "Pasang lock singkat — satu request membangun ulang nilainya, sisanya menyajikan salinan basi", "option_explanation_md": "Ini cache stampede, dan obatnya memang satu rebuild saja yang lewat. Redis `SET NX EX` cukup." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "Move the cache into process memory on each app server", "option_explanation_md": "Now you have N copies expiring at nearly the same time, and servers can disagree." },
+            "id": { "label_md": "Pindahkan cache ke memory proses di setiap app server", "option_explanation_md": "Jadi N salinan yang expire hampir bersamaan, plus data antar server bisa beda." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "Add a read replica to absorb the query spike", "option_explanation_md": "Treating the symptom with hardware. The spike still happens." },
+            "id": { "label_md": "Tambah read replica untuk menampung lonjakan query", "option_explanation_md": "Mengobati gejala dengan hardware. Lonjakannya tetap terjadi." }
+          }
+        }
+      ]
+    }
+  ],
+  "achievements": [
+    {
+      "slug": "first-journey",
+      "icon": "flag",
+      "position": 1,
+      "rule": { "type": "journeys_completed", "count": 1 },
+      "translations": {
+        "en": { "title": "First Journey", "description": "Finish your first journey." },
+        "id": { "title": "Journey Pertama", "description": "Selesaikan journey pertamamu." }
+      }
+    },
+    {
+      "slug": "week-streak",
+      "icon": "flame",
+      "position": 2,
+      "rule": { "type": "streak_days", "count": 7 },
+      "translations": {
+        "en": { "title": "Seven Days", "description": "Answer at least one question on seven consecutive days." },
+        "id": { "title": "Tujuh Hari", "description": "Jawab minimal satu soal selama tujuh hari berturut-turut." }
+      }
+    },
+    {
+      "slug": "empty-queue",
+      "icon": "check",
+      "position": 3,
+      "rule": { "type": "review_queue_cleared", "count": 1 },
+      "translations": {
+        "en": { "title": "Clean Queue", "description": "Clear the whole review queue in one day." },
+        "id": { "title": "Antrean Bersih", "description": "Habiskan seluruh antrean review dalam satu hari." }
+      }
+    }
+  ]
+}
