@@ -3,6 +3,7 @@
 namespace App\Data;
 
 use Spatie\LaravelData\Data;
+use Spatie\TypeScriptTransformer\Attributes\LiteralTypeScriptType;
 
 class AnswerResultData extends Data
 {
@@ -12,6 +13,7 @@ class AnswerResultData extends Data
         /** @var list<int> */
         public array $correctOptionIds,
         public ?string $explanation,
+        #[LiteralTypeScriptType('Record<number, string>')]
         /** @var array<int, string> */
         public array $optionExplanations,
         public int $xpAwarded,
