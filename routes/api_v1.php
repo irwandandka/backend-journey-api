@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AttemptController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\RoadmapController;
 use App\Http\Controllers\Api\V1\TrackController;
@@ -23,4 +24,9 @@ Route::prefix('auth')->name('auth.')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('roadmap', [RoadmapController::class, 'show'])->name('roadmap.show');
     Route::get('tracks/{slug}', [TrackController::class, 'show'])->name('tracks.show');
+
+    Route::post('quizzes/{quizSlug}/attempts', [AttemptController::class, 'store'])->name('attempts.store');
+    Route::get('attempts/{attemptId}/questions', [AttemptController::class, 'questions'])->name('attempts.questions');
+    Route::post('attempts/{attemptId}/answers', [AttemptController::class, 'answer'])->name('attempts.answer');
+    Route::post('attempts/{attemptId}/submit', [AttemptController::class, 'submit'])->name('attempts.submit');
 });
