@@ -15,7 +15,11 @@
     { "slug": "concurrency", "name": "Concurrency" },
     { "slug": "locking", "name": "Locking" },
     { "slug": "redis", "name": "Redis" },
-    { "slug": "cache-stampede", "name": "Cache stampede" }
+    { "slug": "cache-stampede", "name": "Cache stampede" },
+    { "slug": "http", "name": "HTTP" },
+    { "slug": "api-design", "name": "API design" },
+    { "slug": "data-modeling", "name": "Data modeling" },
+    { "slug": "normalization", "name": "Normalization" }
   ],
   "tracks": [
     {
@@ -34,7 +38,16 @@
           "slug": "status-codes-that-mean-something",
           "tier": "foundation",
           "position": 1,
-          "translations": { "en": { "title": "Status Codes That Mean Something" } }
+          "translations": { "en": { "title": "Status Codes That Mean Something" }, "id": { "title": "Status Code yang Berarti" } },
+          "quiz": {
+            "slug": "status-codes-core",
+            "question_count": 2,
+            "translations": {
+              "en": { "title": "Status Codes That Mean Something" },
+              "id": { "title": "Status Code yang Berarti" }
+            },
+            "questions": ["q-status-code-422-vs-400", "q-status-code-202-queued"]
+          }
         },
         {
           "slug": "idempotent-requests",
@@ -60,7 +73,16 @@
           "slug": "normal-forms-in-practice",
           "tier": "foundation",
           "position": 1,
-          "translations": { "en": { "title": "Normal Forms in Practice" } }
+          "translations": { "en": { "title": "Normal Forms in Practice" }, "id": { "title": "Normal Form dalam Praktik" } },
+          "quiz": {
+            "slug": "normal-forms-core",
+            "question_count": 2,
+            "translations": {
+              "en": { "title": "Normal Forms in Practice" },
+              "id": { "title": "Normal Form dalam Praktik" }
+            },
+            "questions": ["q-first-normal-form-list-column", "q-order-line-price-snapshot"]
+          }
         },
         {
           "slug": "soft-deletes-and-their-cost",
@@ -86,7 +108,16 @@
           "slug": "b-tree-internals",
           "tier": "foundation",
           "position": 1,
-          "translations": { "en": { "title": "B-Tree Internals" }, "id": { "title": "Isi Dalam B-Tree" } }
+          "translations": { "en": { "title": "B-Tree Internals" }, "id": { "title": "Isi Dalam B-Tree" } },
+          "quiz": {
+            "slug": "b-tree-internals-core",
+            "question_count": 2,
+            "translations": {
+              "en": { "title": "B-Tree Internals" },
+              "id": { "title": "Isi Dalam B-Tree" }
+            },
+            "questions": ["q-btree-random-uuid-key", "q-btree-low-selectivity-seq-scan"]
+          }
         },
         {
           "slug": "reading-explain",
@@ -394,6 +425,288 @@
           "translations": {
             "en": { "label_md": "Add a read replica to absorb the query spike", "option_explanation_md": "Treating the symptom with hardware. The spike still happens." },
             "id": { "label_md": "Tambah read replica untuk menampung lonjakan query", "option_explanation_md": "Mengobati gejala dengan hardware. Lonjakannya tetap terjadi." }
+          }
+        }
+      ]
+    },
+    {
+      "key": "q-status-code-422-vs-400",
+      "track": "http-api-design",
+      "type": "single_choice",
+      "difficulty": "medium",
+      "tags": ["http", "api-design"],
+      "translations": {
+        "en": {
+          "stem_md": "A client sends `POST /users` with `{\"email\": \"not-an-email\"}`. The JSON parses fine; your validator rejects the email. Which status fits best?",
+          "explanation_md": "400 means the server could not understand the request. 422 means it understood it and the content is still unacceptable."
+        },
+        "id": {
+          "stem_md": "Client mengirim `POST /users` dengan `{\"email\": \"not-an-email\"}`. JSON-nya ter-parse normal; validator kamu menolak email itu. Status mana yang paling tepat?",
+          "explanation_md": "400 berarti server tidak bisa memahami request-nya. 422 berarti server paham, tapi isinya tetap tidak bisa diterima."
+        }
+      },
+      "options": [
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "`400 Bad Request`", "option_explanation_md": "400 is for a request the server cannot parse at all — broken JSON, a missing required header. This body parsed fine." },
+            "id": { "label_md": "`400 Bad Request`", "option_explanation_md": "400 untuk request yang tidak bisa di-parse sama sekali — JSON rusak, header wajib hilang. Body ini ter-parse normal." }
+          }
+        },
+        {
+          "is_correct": true,
+          "translations": {
+            "en": { "label_md": "`422 Unprocessable Entity`", "option_explanation_md": "The syntax was understood, the content was not acceptable. That is exactly 422, and it is what Laravel's validator returns." },
+            "id": { "label_md": "`422 Unprocessable Entity`", "option_explanation_md": "Sintaksnya dipahami, isinya tidak bisa diterima. Itu persis 422, dan itu juga yang dikembalikan validator Laravel." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "`200 OK` with `{\"error\": \"...\"}` in the body", "option_explanation_md": "The request did not succeed. Hiding the failure in a 200 forces every client, proxy and log to read the body before it knows what happened." },
+            "id": { "label_md": "`200 OK` dengan `{\"error\": \"...\"}` di body", "option_explanation_md": "Request-nya tidak sukses. Menyembunyikan kegagalan di dalam 200 memaksa semua client, proxy, dan log membaca body dulu sebelum tahu apa yang terjadi." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "`500 Internal Server Error`", "option_explanation_md": "Nothing broke on the server. A 500 tells the client to retry and wakes whoever is on call." },
+            "id": { "label_md": "`500 Internal Server Error`", "option_explanation_md": "Tidak ada yang rusak di server. 500 menyuruh client retry dan membangunkan orang yang sedang on-call." }
+          }
+        }
+      ]
+    },
+    {
+      "key": "q-status-code-202-queued",
+      "track": "http-api-design",
+      "type": "single_choice",
+      "difficulty": "easy",
+      "tags": ["http", "api-design"],
+      "translations": {
+        "en": {
+          "stem_md": "`POST /exports` pushes a job onto a queue and returns immediately. The file does not exist yet. Which response is the honest one?",
+          "explanation_md": "202 is the only code that says \"accepted, not finished\". Everything else claims work that has not happened."
+        },
+        "id": {
+          "stem_md": "`POST /exports` memasukkan job ke queue lalu langsung return. File-nya belum ada. Response mana yang jujur?",
+          "explanation_md": "202 satu-satunya kode yang bilang \"diterima, belum selesai\". Sisanya mengklaim kerjaan yang belum terjadi."
+        }
+      },
+      "options": [
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "`201 Created` with a `Location` pointing at the export file", "option_explanation_md": "Nothing was created yet. A client that follows that Location gets a 404." },
+            "id": { "label_md": "`201 Created` dengan `Location` menunjuk file export-nya", "option_explanation_md": "Belum ada apa pun yang dibuat. Client yang mengikuti Location itu akan dapat 404." }
+          }
+        },
+        {
+          "is_correct": true,
+          "translations": {
+            "en": { "label_md": "`202 Accepted` with a status URL the client can poll", "option_explanation_md": "202 says the work is accepted but not finished, and the status URL gives the client somewhere to look." },
+            "id": { "label_md": "`202 Accepted` dengan URL status yang bisa di-poll client", "option_explanation_md": "202 bilang kerjaannya diterima tapi belum selesai, dan URL status memberi client tempat untuk mengecek." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "`200 OK` with an empty body", "option_explanation_md": "200 claims the request is done, and an empty body leaves the client with no handle on the job." },
+            "id": { "label_md": "`200 OK` dengan body kosong", "option_explanation_md": "200 mengklaim request-nya selesai, dan body kosong membuat client tidak punya pegangan apa pun ke job itu." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "`204 No Content`", "option_explanation_md": "204 means success with nothing to say. Here there is something to say: where to check on the job." },
+            "id": { "label_md": "`204 No Content`", "option_explanation_md": "204 berarti sukses tanpa ada yang perlu disampaikan. Di sini ada yang perlu disampaikan: di mana job-nya bisa dicek." }
+          }
+        }
+      ]
+    },
+    {
+      "key": "q-first-normal-form-list-column",
+      "track": "data-modeling",
+      "type": "single_choice",
+      "difficulty": "easy",
+      "tags": ["data-modeling", "normalization"],
+      "translations": {
+        "en": {
+          "stem_md": "A `products` table has a `tags` column holding `'postgres,indexing,wal'`. Which problem actually bites in production?",
+          "explanation_md": "Naming the broken normal form is not the same as knowing what it costs. Here the cost is that no index can serve a tag filter."
+        },
+        "id": {
+          "stem_md": "Tabel `products` punya kolom `tags` berisi `'postgres,indexing,wal'`. Masalah mana yang benar-benar terasa di produksi?",
+          "explanation_md": "Menyebut normal form yang dilanggar beda dengan tahu biayanya. Di sini biayanya: tidak ada index yang bisa melayani filter per tag."
+        }
+      },
+      "options": [
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "It breaks first normal form, so it is wrong by definition", "option_explanation_md": "True, and useless on its own. 1NF is the name of the problem, not the cost of it." },
+            "id": { "label_md": "Itu melanggar first normal form, jadi salah secara definisi", "option_explanation_md": "Benar, tapi berdiri sendiri tidak berguna. 1NF adalah nama masalahnya, bukan biayanya." }
+          }
+        },
+        {
+          "is_correct": true,
+          "translations": {
+            "en": { "label_md": "No index can serve one tag, so every tag filter becomes `LIKE '%wal%'` over the whole table — and it also matches `wal-archive`", "option_explanation_md": "That is the real bill: a sequential scan on every filter, plus wrong rows from substring matches." },
+            "id": { "label_md": "Tidak ada index yang bisa melayani satu tag, jadi setiap filter tag jadi `LIKE '%wal%'` ke seluruh tabel — dan itu juga kena `wal-archive`", "option_explanation_md": "Itu tagihan sebenarnya: sequential scan di setiap filter, plus baris salah karena substring." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "The column will eventually run out of space", "option_explanation_md": "A Postgres `text` column grows to about a gigabyte. Size is not what hurts here." },
+            "id": { "label_md": "Kolomnya akan kehabisan ruang", "option_explanation_md": "Kolom `text` di Postgres bisa sampai sekitar satu gigabyte. Yang sakit di sini bukan ukuran." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "The tag names repeat on every row, which wastes disk", "option_explanation_md": "Real, but minor. Duplication costs disk once; the missing index costs latency on every single query." },
+            "id": { "label_md": "Nama tag berulang di tiap baris, jadi buang-buang disk", "option_explanation_md": "Nyata, tapi kecil. Duplikasi membayar disk sekali; index yang tidak ada membayar latensi di setiap query." }
+          }
+        }
+      ]
+    },
+    {
+      "key": "q-order-line-price-snapshot",
+      "track": "data-modeling",
+      "type": "single_choice",
+      "difficulty": "medium",
+      "tags": ["data-modeling", "normalization"],
+      "translations": {
+        "en": {
+          "stem_md": "`order_lines` stores `unit_price` even though `products.price` already exists. A reviewer calls it denormalisation and asks you to drop the column and join instead. What do you answer?",
+          "explanation_md": "Two columns that look like duplicates can mean different things. `products.price` is today's price; `order_lines.unit_price` is what this customer was charged."
+        },
+        "id": {
+          "stem_md": "`order_lines` menyimpan `unit_price` padahal `products.price` sudah ada. Reviewer menyebutnya denormalisasi dan minta kolomnya dihapus lalu di-join saja. Apa jawabanmu?",
+          "explanation_md": "Dua kolom yang kelihatan duplikat bisa punya makna berbeda. `products.price` adalah harga hari ini; `order_lines.unit_price` adalah harga yang ditagihkan ke pelanggan itu."
+        }
+      },
+      "options": [
+        {
+          "is_correct": true,
+          "translations": {
+            "en": { "label_md": "Keep it — `products.price` is today's price, the order needs the price at the time it was placed", "option_explanation_md": "The two columns answer different questions. Joining would silently rewrite old invoices every time someone edits a price." },
+            "id": { "label_md": "Pertahankan — `products.price` itu harga hari ini, order butuh harga saat order dibuat", "option_explanation_md": "Dua kolom itu menjawab pertanyaan berbeda. Join akan diam-diam mengubah invoice lama setiap kali ada yang mengedit harga." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "Drop it — the join is cheap and normalisation wins", "option_explanation_md": "The join is cheap. It is also wrong: it answers \"what does this cost now\", not \"what did they pay\"." },
+            "id": { "label_md": "Hapus — join-nya murah dan normalisasi lebih penting", "option_explanation_md": "Join-nya murah. Tapi juga salah: itu menjawab \"sekarang harganya berapa\", bukan \"dia bayar berapa\"." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "Drop it and add `price_changed_at` on `products`", "option_explanation_md": "One timestamp does not reconstruct a price history, and it still cannot tell you what this order was charged." },
+            "id": { "label_md": "Hapus, lalu tambah `price_changed_at` di `products`", "option_explanation_md": "Satu timestamp tidak bisa merekonstruksi riwayat harga, dan tetap tidak bisa bilang order ini ditagih berapa." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "Keep both and add a trigger that keeps `unit_price` equal to `products.price`", "option_explanation_md": "That deletes the only reason the column exists. Now the invoice changes under the customer." },
+            "id": { "label_md": "Pertahankan keduanya dan tambah trigger yang menjaga `unit_price` sama dengan `products.price`", "option_explanation_md": "Itu menghapus satu-satunya alasan kolom itu ada. Sekarang invoice-nya berubah di belakang pelanggan." }
+          }
+        }
+      ]
+    },
+    {
+      "key": "q-btree-random-uuid-key",
+      "track": "indexing-query-plans",
+      "type": "single_choice",
+      "difficulty": "medium",
+      "tags": ["postgres", "indexing"],
+      "translations": {
+        "en": {
+          "stem_md": "A high-write table uses a random `uuid` (v4) as its primary key instead of a monotonically increasing `bigint`. Inside the B-Tree, which effect dominates the extra write cost?",
+          "explanation_md": "A B-Tree stores keys in sorted order, so where a key lands is decided by its value. Random values land everywhere; increasing values land in one place."
+        },
+        "id": {
+          "stem_md": "Tabel dengan write tinggi memakai `uuid` (v4) acak sebagai primary key, bukan `bigint` yang naik terus. Di dalam B-Tree, efek mana yang paling menentukan tambahan biaya write-nya?",
+          "explanation_md": "B-Tree menyimpan key dalam urutan terurut, jadi posisi sebuah key ditentukan nilainya. Nilai acak jatuh di mana-mana; nilai yang naik jatuh di satu tempat."
+        }
+      },
+      "options": [
+        {
+          "is_correct": true,
+          "translations": {
+            "en": { "label_md": "Every insert lands on a random leaf page, so writes touch pages that are no longer in cache and split them in the middle", "option_explanation_md": "Random keys spread writes across the whole index. An increasing key keeps appending to the rightmost leaf, which stays hot in cache and splits cleanly." },
+            "id": { "label_md": "Tiap insert jatuh di leaf page acak, jadi write menyentuh page yang sudah tidak ada di cache dan membelahnya di tengah", "option_explanation_md": "Key acak menyebarkan write ke seluruh index. Key yang naik terus hanya menambah di leaf paling kanan, yang tetap panas di cache dan terbelah bersih." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "The tree gets deeper, because a 16-byte key fits fewer entries per page than an 8-byte one", "option_explanation_md": "That part is true and does cost something, but a level or two of depth is small next to dirtying and splitting random pages on every insert." },
+            "id": { "label_md": "Tree-nya jadi lebih dalam, karena key 16 byte memuat lebih sedikit entri per page daripada 8 byte", "option_explanation_md": "Bagian itu benar dan ada biayanya, tapi satu-dua level kedalaman kecil dibanding mengotori dan membelah page acak di setiap insert." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "Lookups degrade to a full scan, because UUIDs have no natural order", "option_explanation_md": "The index still stores them in sorted byte order. A lookup is still a tree descent of a few pages." },
+            "id": { "label_md": "Lookup turun jadi full scan, karena UUID tidak punya urutan alami", "option_explanation_md": "Index tetap menyimpannya terurut secara byte. Lookup tetap turun beberapa page lewat tree." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "Nothing changes — a B-Tree rebalances itself either way", "option_explanation_md": "It does rebalance itself. The question is what that rebalancing costs, and with random keys it costs splits on cold pages." },
+            "id": { "label_md": "Tidak ada yang berubah — B-Tree menyeimbangkan dirinya sendiri", "option_explanation_md": "Benar dia menyeimbangkan diri. Pertanyaannya berapa biayanya, dan dengan key acak biayanya adalah split di page yang dingin." }
+          }
+        }
+      ]
+    },
+    {
+      "key": "q-btree-low-selectivity-seq-scan",
+      "track": "indexing-query-plans",
+      "type": "single_choice",
+      "difficulty": "hard",
+      "tags": ["postgres", "indexing", "query-plans"],
+      "translations": {
+        "en": {
+          "stem_md": "`orders` has 10M rows and an index on `is_paid`, where 92% of rows are `true`. `WHERE is_paid = true` still plans a Seq Scan. Why is the planner right?",
+          "explanation_md": "An index scan pays a heap fetch per matching row, and those fetches are scattered. Past a few percent of the table, one ordered pass over the heap wins."
+        },
+        "id": {
+          "stem_md": "`orders` punya 10 juta baris dan index di `is_paid`, di mana 92% barisnya `true`. `WHERE is_paid = true` tetap direncanakan sebagai Seq Scan. Kenapa planner-nya benar?",
+          "explanation_md": "Index scan membayar satu heap fetch per baris yang cocok, dan fetch-nya tersebar. Lewat beberapa persen dari tabel, satu lintasan terurut ke heap lebih murah."
+        }
+      },
+      "options": [
+        {
+          "is_correct": true,
+          "translations": {
+            "en": { "label_md": "Reading 9.2M rows through the index means 9.2M scattered heap fetches, which costs more than reading the table once in physical order", "option_explanation_md": "Selectivity, not the existence of an index, decides this. The index wins when it eliminates most of the table, and here it eliminates 8%." },
+            "id": { "label_md": "Membaca 9,2 juta baris lewat index berarti 9,2 juta heap fetch yang tersebar, lebih mahal daripada membaca tabel sekali dalam urutan fisik", "option_explanation_md": "Yang menentukan selektivitas, bukan ada-tidaknya index. Index menang kalau membuang sebagian besar tabel, dan di sini dia hanya membuang 8%." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "Postgres never uses an index on a boolean column", "option_explanation_md": "It will. `WHERE is_paid = false` hits the other 8%, and there the same index is a good choice." },
+            "id": { "label_md": "Postgres tidak pernah memakai index di kolom boolean", "option_explanation_md": "Dia memakainya. `WHERE is_paid = false` kena 8% sisanya, dan di situ index yang sama adalah pilihan bagus." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "The statistics are stale and `ANALYZE` would bring the index back", "option_explanation_md": "Stale statistics cause plenty of bad plans, but here the statistics are right and so is the plan." },
+            "id": { "label_md": "Statistiknya basi dan `ANALYZE` akan membuat index terpakai lagi", "option_explanation_md": "Statistik basi memang sering bikin plan buruk, tapi di sini statistiknya benar dan plan-nya juga benar." }
+          }
+        },
+        {
+          "is_correct": false,
+          "translations": {
+            "en": { "label_md": "The index is bloated and needs a `REINDEX`", "option_explanation_md": "Bloat makes an index scan worse, not a seq scan better. Even a freshly built index loses this one." },
+            "id": { "label_md": "Index-nya bloat dan perlu `REINDEX`", "option_explanation_md": "Bloat membuat index scan makin buruk, bukan membuat seq scan makin bagus. Index yang baru dibangun pun kalah di kasus ini." }
           }
         }
       ]
