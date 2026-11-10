@@ -9,7 +9,8 @@ class AttemptData extends Data
 {
     public function __construct(
         public int $id,
-        public string $quizSlug,
+        public string $kind,
+        public ?string $quizSlug,
         public string $status,
         public string $locale,
         public int $questionCount,
@@ -21,7 +22,8 @@ class AttemptData extends Data
     {
         return new self(
             id: $attempt->id,
-            quizSlug: $attempt->quiz->slug,
+            kind: $attempt->kind,
+            quizSlug: $attempt->quiz?->slug,
             status: $attempt->status,
             locale: $attempt->locale,
             questionCount: $attempt->question_count,

@@ -14,7 +14,7 @@ class AttemptResultData extends Data
         public int $xpEarned,
         public int $xpTotal,
         public int $currentStreak,
-        public string $journeyStatus,
+        public ?string $journeyStatus,
         /** @var list<array{position: int, stem: string, dueAt: string}> */
         public array $scheduledForReview,
     ) {}
