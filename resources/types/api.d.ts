@@ -56,6 +56,15 @@ passThreshold: number,
 quizSlug: string | null,
 questionCount: number,
 };
+export type JourneySearchData = {
+slug: string,
+title: string,
+trackSlug: string,
+trackName: string,
+tier: string,
+position: number,
+hasQuiz: boolean,
+};
 export type LoginData = {
 email: string,
 password: string,

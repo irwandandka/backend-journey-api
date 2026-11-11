@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AchievementController;
 use App\Http\Controllers\Api\V1\AttemptController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\JourneyController;
 use App\Http\Controllers\Api\V1\ReviewController;
 use App\Http\Controllers\Api\V1\RoadmapController;
 use App\Http\Controllers\Api\V1\TrackController;
@@ -26,6 +27,7 @@ Route::prefix('auth')->name('auth.')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('roadmap', [RoadmapController::class, 'show'])->name('roadmap.show');
     Route::get('tracks/{slug}', [TrackController::class, 'show'])->name('tracks.show');
+    Route::get('journeys', [JourneyController::class, 'index'])->name('journeys.index');
 
     Route::get('achievements', [AchievementController::class, 'index'])->name('achievements.index');
 
