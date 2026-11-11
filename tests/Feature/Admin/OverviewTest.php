@@ -4,6 +4,7 @@ namespace Tests\Feature\Admin;
 
 use App\Models\Tag;
 use App\Models\User;
+use Database\Seeders\ContentSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -61,8 +62,8 @@ class OverviewTest extends TestCase
 
     public function test_translation_coverage_counts_each_locale_against_the_question_total(): void
     {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-        app(\Database\Seeders\ContentSeeder::class)->sync(ContentFixture::minimal());
+        $this->seed(RoleSeeder::class);
+        app(ContentSeeder::class)->sync(ContentFixture::minimal());
 
         $this->actingAs($this->admin)->getJson('/api/v1/admin/overview')
             ->assertOk()

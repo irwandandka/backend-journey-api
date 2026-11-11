@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\User;
-use App\Models\UserDailyActivity;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 

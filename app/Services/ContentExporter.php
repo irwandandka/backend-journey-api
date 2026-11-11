@@ -164,7 +164,9 @@ class ContentExporter
             foreach ($fields as $field) {
                 $value = $row->getAttribute($field);
 
-                if ($value === null) continue;
+                if ($value === null) {
+                    continue;
+                }
 
                 $values[$field] = $value;
             }

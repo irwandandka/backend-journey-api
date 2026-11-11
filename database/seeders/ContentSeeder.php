@@ -169,28 +169,28 @@ class ContentSeeder extends Seeder
     {
         $journey = Journey::where('slug', $journeySlug)->sole();
 
-                $quiz = Quiz::updateOrCreate(
-                    ['slug' => $quizRow['slug']],
-                    [
-                        'journey_id' => $journey->id,
-                        'question_count' => $quizRow['question_count'] ?? count($quizRow['questions']),
-                        'time_limit_s' => $quizRow['time_limit_s'] ?? null,
-                        'shuffle_questions' => $quizRow['shuffle_questions'] ?? true,
-                        'shuffle_options' => $quizRow['shuffle_options'] ?? true,
-                        'position' => $quizRow['position'] ?? 0,
-                    ],
-                );
+        $quiz = Quiz::updateOrCreate(
+            ['slug' => $quizRow['slug']],
+            [
+                'journey_id' => $journey->id,
+                'question_count' => $quizRow['question_count'] ?? count($quizRow['questions']),
+                'time_limit_s' => $quizRow['time_limit_s'] ?? null,
+                'shuffle_questions' => $quizRow['shuffle_questions'] ?? true,
+                'shuffle_options' => $quizRow['shuffle_options'] ?? true,
+                'position' => $quizRow['position'] ?? 0,
+            ],
+        );
 
-                $this->syncTranslations($quiz, $quizRow['translations'] ?? []);
+        $this->syncTranslations($quiz, $quizRow['translations'] ?? []);
 
-                $pivot = [];
+        $pivot = [];
 
-                foreach (array_values($quizRow['questions']) as $position => $key) {
-                    $question = $questions[$key]
-                        ?? throw new RuntimeException("Quiz {$quizRow['slug']} references unknown question {$key}");
+        foreach (array_values($quizRow['questions']) as $position => $key) {
+            $question = $questions[$key]
+                ?? throw new RuntimeException("Quiz {$quizRow['slug']} references unknown question {$key}");
 
-                    $pivot[$question->id] = ['position' => $position];
-                }
+            $pivot[$question->id] = ['position' => $position];
+        }
 
         $quiz->questions()->sync($pivot);
     }

@@ -4,6 +4,7 @@ namespace Tests\Feature\Content;
 
 use App\Models\Achievement;
 use App\Models\Question;
+use App\Models\QuestionVersion;
 use App\Models\Track;
 use App\Services\AchievementEvaluator;
 use App\Services\JourneyUnlock;
@@ -132,10 +133,10 @@ class AuthoredContentTest extends TestCase
 
     public function test_reseeding_the_authored_file_creates_no_new_version(): void
     {
-        $before = \App\Models\QuestionVersion::count();
+        $before = QuestionVersion::count();
 
         app(ContentSeeder::class)->run();
 
-        $this->assertSame($before, \App\Models\QuestionVersion::count(), 'an unchanged content file must not bump any question version');
+        $this->assertSame($before, QuestionVersion::count(), 'an unchanged content file must not bump any question version');
     }
 }

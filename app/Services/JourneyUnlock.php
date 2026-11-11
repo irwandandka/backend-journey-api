@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Journey;
+use App\Models\UserJourneyProgress;
 use Illuminate\Support\Collection;
 
 class JourneyUnlock
@@ -11,7 +12,7 @@ class JourneyUnlock
 
     /**
      * @param  Collection<int, Journey>  $siblings  every published journey of the track, ordered by position
-     * @param  Collection<int, \App\Models\UserJourneyProgress>  $progress  keyed by journey id
+     * @param  Collection<int, UserJourneyProgress>  $progress  keyed by journey id
      */
     public function statusFor(Journey $journey, Collection $siblings, Collection $progress): string
     {
@@ -26,7 +27,7 @@ class JourneyUnlock
 
     /**
      * @param  Collection<int, Journey>  $siblings
-     * @param  Collection<int, \App\Models\UserJourneyProgress>  $progress
+     * @param  Collection<int, UserJourneyProgress>  $progress
      */
     public function isUnlocked(Journey $journey, Collection $siblings, Collection $progress): bool
     {

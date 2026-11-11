@@ -12,7 +12,7 @@ class TypeScriptTransformerServiceProvider extends BaseTypeScriptTransformerServ
     protected function configure(TypeScriptTransformerConfigFactory $config): void
     {
         $config
-            ->extension(new LaravelDataTypeScriptTransformerExtension())
+            ->extension(new LaravelDataTypeScriptTransformerExtension)
             ->transformDirectories(app_path('Data'))
             ->outputDirectory(base_path('resources/types'))
             ->withoutManifest()
