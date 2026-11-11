@@ -2,8 +2,10 @@
 
 namespace Tests\Feature\Content;
 
+use App\Models\Achievement;
 use App\Models\Question;
 use App\Models\Track;
+use App\Services\AchievementEvaluator;
 use App\Services\JourneyUnlock;
 use Database\Seeders\ContentSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -104,6 +106,27 @@ class AuthoredContentTest extends TestCase
                     "an option of {$question->key} has no {$fallback} translation to fall back to",
                 );
             }
+        }
+    }
+
+    public function test_every_authored_achievement_rule_is_one_the_evaluator_can_award(): void
+    {
+        $achievements = Achievement::all();
+
+        $this->assertNotEmpty($achievements);
+
+        foreach ($achievements as $achievement) {
+            $this->assertContains(
+                $achievement->rule['type'] ?? null,
+                AchievementEvaluator::RULE_TYPES,
+                "achievement {$achievement->slug} has a rule type the evaluator does not know, so it can never be unlocked",
+            );
+
+            $this->assertGreaterThanOrEqual(
+                1,
+                $achievement->rule['count'] ?? 0,
+                "achievement {$achievement->slug} has no reachable target",
+            );
         }
     }
 

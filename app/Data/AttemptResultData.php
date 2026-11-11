@@ -17,5 +17,7 @@ class AttemptResultData extends Data
         public ?string $journeyStatus,
         /** @var list<array{position: int, stem: string, dueAt: string}> */
         public array $scheduledForReview,
+        /** @var list<AchievementData> */
+        public array $unlockedAchievements = [],
     ) {}
 }

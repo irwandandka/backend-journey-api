@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Data\AchievementData;
 use App\Data\AnswerResultData;
 use App\Data\AttemptResultData;
 use App\Models\Journey;
@@ -27,6 +28,7 @@ class AttemptService
         private readonly ReviewScheduler $reviews,
         private readonly StreakTracker $streaks,
         private readonly JourneyUnlock $unlock,
+        private readonly AchievementEvaluator $achievements,
     ) {}
 
     public function startOrResume(User $user, Quiz $quiz, string $locale): QuizAttempt
@@ -382,6 +384,8 @@ class AttemptService
             ? $scheduled === []
             : $score >= $journey->pass_threshold;
 
+        $unlocked = $this->achievements->evaluate($user, $attempt->locale);
+
         return new AttemptResultData(
             score: $score,
             correctCount: $correct->count(),
@@ -392,6 +396,9 @@ class AttemptService
             currentStreak: $user->current_streak,
             journeyStatus: $journeyStatus === null ? null : (string) $journeyStatus,
             scheduledForReview: $scheduled,
+            unlockedAchievements: $unlocked
+                ->map(fn ($achievement) => AchievementData::fromModel($achievement, now()->toIso8601String()))
+                ->all(),
         );
     }
 

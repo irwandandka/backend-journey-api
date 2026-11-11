@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AchievementController;
 use App\Http\Controllers\Api\V1\AttemptController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\ReviewController;
@@ -25,6 +26,8 @@ Route::prefix('auth')->name('auth.')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('roadmap', [RoadmapController::class, 'show'])->name('roadmap.show');
     Route::get('tracks/{slug}', [TrackController::class, 'show'])->name('tracks.show');
+
+    Route::get('achievements', [AchievementController::class, 'index'])->name('achievements.index');
 
     Route::get('review', [ReviewController::class, 'summary'])->name('review.summary');
     Route::post('review/attempts', [ReviewController::class, 'store'])->name('review.store');

@@ -1,5 +1,12 @@
 declare namespace App {
 namespace Data {
+export type AchievementData = {
+slug: string,
+icon: string,
+title: string,
+description: string | null,
+unlockedAt: string | null,
+};
 export type AnswerResultData = {
 position: number,
 isCorrect: boolean,
@@ -34,6 +41,7 @@ position: number,
 stem: string,
 dueAt: string,
 }[],
+unlockedAchievements: App.Data.AchievementData[],
 };
 export type JourneyData = {
 slug: string,
