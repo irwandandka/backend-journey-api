@@ -5,18 +5,19 @@ namespace Database\Seeders;
 use App\Models\Achievement;
 use App\Models\Journey;
 use App\Models\Question;
-use App\Models\QuestionOption;
-use App\Models\QuestionVersion;
 use App\Models\Quiz;
 use App\Models\Roadmap;
 use App\Models\Tag;
 use App\Models\Track;
+use App\Services\QuestionWriter;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class ContentSeeder extends Seeder
 {
+    public function __construct(private readonly QuestionWriter $questions) {}
+
     public function run(string $file = 'backend-engineering.json'): void
     {
         $path = database_path("content/{$file}");
@@ -125,60 +126,17 @@ class ContentSeeder extends Seeder
         $questions = [];
 
         foreach ($rows as $row) {
-            $track = $tracks[$row['track']]
-                ?? throw new RuntimeException("Unknown track for question {$row['key']}: {$row['track']}");
-
-            $question = Question::updateOrCreate(
-                ['key' => $row['key']],
-                [
-                    'track_id' => $track->id,
-                    'type' => $row['type'] ?? 'single_choice',
-                    'difficulty' => $row['difficulty'] ?? 'medium',
-                    'is_active' => $row['is_active'] ?? true,
-                ],
-            );
-
-            $hash = hash('sha256', json_encode([
-                $row['type'] ?? 'single_choice',
-                $row['code_language'] ?? null,
-                $row['translations'],
-                $row['options'],
-            ], JSON_THROW_ON_ERROR));
-
-            $current = $question->currentVersion;
-
-            if ($current === null || $current->content_hash !== $hash) {
-                $version = QuestionVersion::create([
-                    'question_id' => $question->id,
-                    'version' => (int) $question->versions()->max('version') + 1,
-                    'code_language' => $row['code_language'] ?? null,
-                    'content_hash' => $hash,
-                ]);
-
-                $this->syncTranslations($version, $row['translations']);
-
-                foreach (array_values($row['options']) as $position => $optionRow) {
-                    $option = QuestionOption::create([
-                        'question_version_id' => $version->id,
-                        'position' => $position,
-                        'is_correct' => $optionRow['is_correct'],
-                    ]);
-
-                    $this->syncTranslations($option, $optionRow['translations']);
-                }
-
-                $question->update(['current_version_id' => $version->id]);
-                $question->refresh();
+            if (! isset($tracks[$row['track']])) {
+                throw new RuntimeException("Unknown track for question {$row['key']}: {$row['track']}");
             }
 
-            $question->tags()->sync(
-                collect($row['tags'] ?? [])
-                    ->map(fn (string $slug) => $tags[$slug]?->id
-                        ?? throw new RuntimeException("Unknown tag: {$slug}"))
-                    ->all(),
-            );
+            foreach ($row['tags'] ?? [] as $slug) {
+                if (! isset($tags[$slug])) {
+                    throw new RuntimeException("Unknown tag: {$slug}");
+                }
+            }
 
-            $questions[$row['key']] = $question;
+            $questions[$row['key']] = $this->questions->save($row);
         }
 
         return $questions;
