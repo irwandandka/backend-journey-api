@@ -7,14 +7,19 @@ use App\Data\Admin\QuestionInputData;
 use App\Data\Admin\QuestionSummaryData;
 use App\Http\Middleware\SetLocale;
 use App\Models\Question;
+use App\Services\ContentGuard;
 use App\Services\QuestionWriter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class QuestionController
 {
-    public function __construct(private readonly QuestionWriter $writer) {}
+    public function __construct(
+        private readonly QuestionWriter $writer,
+        private readonly ContentGuard $guard,
+    ) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -115,6 +120,36 @@ class QuestionController
             'data' => QuestionDetailData::fromModel($fresh),
             'meta' => ['newVersion' => $question->current_version_id !== $before],
         ]);
+    }
+
+    public function destroy(string $key): JsonResponse
+    {
+        $question = Question::where('key', $key)->withCount('quizzes')->firstOrFail();
+
+        $this->guard->refuseIf(
+            $question->quizzes_count > 0,
+            'question',
+            "{$key} is used by {$question->quizzes_count} quizzes. Detach it first.",
+        );
+
+        $served = DB::table('quiz_attempt_questions')
+            ->whereIn('question_version_id', $question->versions()->select('id'))
+            ->count();
+
+        $this->guard->refuseIf(
+            $served > 0,
+            'question',
+            "{$key} has been served {$served} times. Deactivate it instead, so the attempts that used it still read correctly.",
+        );
+
+        DB::transaction(function () use ($question) {
+            $question->update(['current_version_id' => null]);
+            $question->tags()->detach();
+            $question->versions()->delete();
+            $question->delete();
+        });
+
+        return response()->json(null, 204);
     }
 
     private function find(string $key): Question

@@ -43,6 +43,35 @@ dueAt: string,
 }[],
 unlockedAchievements: App.Data.AchievementData[],
 };
+export type InsightData = {
+overall: {
+answered: number,
+correct: number,
+accuracy: number | null,
+tracked: number,
+},
+byTag: {
+slug: string,
+name: string,
+answered: number,
+correct: number,
+accuracy: number,
+}[],
+byTrack: {
+slug: string,
+name: string,
+answered: number,
+correct: number,
+accuracy: number,
+}[],
+hardestQuestions: {
+key: string,
+stem: string,
+lapses: number,
+dueAt: string,
+trackSlug: string,
+}[],
+};
 export type JourneyData = {
 slug: string,
 title: string,
@@ -240,6 +269,20 @@ position: number,
 timeLimitS: number | null,
 translations: Record<string, { title: string }>,
 };
+export type RoadmapData = {
+slug: string,
+title: string,
+description: string | null,
+position: number,
+isPublished: boolean,
+trackCount: number,
+};
+export type RoadmapInputData = {
+slug: string,
+position: number,
+isPublished: boolean,
+translations: Record<string, { title: string; description?: string | null }>,
+};
 export type TrackInputData = {
 slug: string,
 abbreviation: string,
@@ -247,6 +290,7 @@ colorDark: string,
 colorLight: string,
 position: number,
 isPublished: boolean,
+roadmapSlug: string | null,
 translations: Record<string, { name: string; description?: string | null }>,
 };
 export type TrackTreeData = {

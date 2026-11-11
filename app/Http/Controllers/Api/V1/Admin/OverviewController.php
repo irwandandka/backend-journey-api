@@ -3,22 +3,29 @@
 namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Data\Admin\OverviewData;
-use App\Services\ContentExporter;
 use App\Http\Middleware\SetLocale;
 use App\Models\Journey;
 use App\Models\Question;
 use App\Models\Quiz;
 use App\Models\Track;
+use App\Services\ContentExporter;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class OverviewController
 {
-    public function export(ContentExporter $exporter): JsonResponse
+    public function export(Request $request, ContentExporter $exporter): JsonResponse
     {
+        $request->validate(['roadmap' => ['nullable', 'string', 'exists:roadmaps,slug']]);
+
+        $slug = $request->string('roadmap')->toString() ?: null;
+        $content = $exporter->export($slug);
+        $name = $content['roadmap']['slug'];
+
         return response()
-            ->json($exporter->export(), options: JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
-            ->header('Content-Disposition', 'attachment; filename="backend-journey-content.json"');
+            ->json($content, options: JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            ->header('Content-Disposition', "attachment; filename=\"{$name}.json\"");
     }
 
     public function show(): JsonResponse

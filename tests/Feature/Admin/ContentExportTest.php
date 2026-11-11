@@ -41,9 +41,23 @@ class ContentExportTest extends TestCase
     {
         $this->actingAs($this->admin)->getJson('/api/v1/admin/export')
             ->assertOk()
-            ->assertHeader('Content-Disposition', 'attachment; filename="backend-journey-content.json"')
+            ->assertHeader('Content-Disposition', 'attachment; filename="backend-engineering.json"')
             ->assertJsonPath('roadmap.slug', 'backend-engineering')
             ->assertJsonPath('tracks.0.slug', 'http-api-design');
+    }
+
+    public function test_an_unknown_roadmap_is_refused(): void
+    {
+        $this->actingAs($this->admin)->getJson('/api/v1/admin/export?roadmap=nope')
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('roadmap');
+    }
+
+    public function test_the_export_can_be_asked_for_one_roadmap(): void
+    {
+        $this->actingAs($this->admin)->getJson('/api/v1/admin/export?roadmap=backend-engineering')
+            ->assertOk()
+            ->assertJsonPath('roadmap.slug', 'backend-engineering');
     }
 
     public function test_the_export_carries_everything_the_seeder_reads(): void

@@ -6,12 +6,12 @@ use App\Data\Admin\JourneyInputData;
 use App\Data\Admin\QuizInputData;
 use App\Data\Admin\TrackInputData;
 use App\Data\Admin\TrackTreeData;
-use App\Http\Middleware\SetLocale;
 use App\Models\Journey;
 use App\Models\Question;
 use App\Models\Quiz;
 use App\Models\Roadmap;
 use App\Models\Track;
+use App\Services\ContentGuard;
 use App\Services\TranslationWriter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,15 +20,20 @@ use Illuminate\Validation\ValidationException;
 
 class StructureController
 {
-    public function __construct(private readonly TranslationWriter $translations) {}
+    public function __construct(
+        private readonly TranslationWriter $translations,
+        private readonly ContentGuard $guard,
+    ) {}
 
     public function storeTrack(TrackInputData $data): JsonResponse
     {
-        $this->assertFallbackLocale($data->translations, 'translations');
-        $this->assertFree(Track::class, $data->slug, 'track');
+        $this->guard->assertFallbackLocale($data->translations, 'translations');
+        $this->guard->assertSlugFree(Track::class, $data->slug, 'track');
 
-        $roadmap = Roadmap::orderBy('position')->first()
-            ?? throw ValidationException::withMessages(['slug' => 'There is no roadmap to attach a track to.']);
+        $roadmap = ($data->roadmapSlug === null
+            ? Roadmap::orderBy('position')->first()
+            : Roadmap::where('slug', $data->roadmapSlug)->first())
+            ?? throw ValidationException::withMessages(['roadmapSlug' => 'There is no roadmap to attach a track to.']);
 
         $track = DB::transaction(function () use ($data, $roadmap) {
             $track = Track::create([
@@ -53,11 +58,16 @@ class StructureController
     {
         $track = Track::where('slug', $slug)->firstOrFail();
 
-        $this->assertFallbackLocale($data->translations, 'translations');
-        $this->assertSameSlug($data->slug, $slug, 'track');
+        $this->guard->assertFallbackLocale($data->translations, 'translations');
+        $this->guard->assertSameSlug($data->slug, $slug, 'track');
 
-        DB::transaction(function () use ($data, $track) {
+        $roadmapId = $data->roadmapSlug === null
+            ? $track->roadmap_id
+            : (int) Roadmap::where('slug', $data->roadmapSlug)->value('id');
+
+        DB::transaction(function () use ($data, $track, $roadmapId) {
             $track->update([
+                'roadmap_id' => $roadmapId,
                 'abbreviation' => strtoupper($data->abbreviation),
                 'color_dark' => strtolower($data->colorDark),
                 'color_light' => strtolower($data->colorLight),
@@ -73,8 +83,8 @@ class StructureController
 
     public function storeJourney(JourneyInputData $data): JsonResponse
     {
-        $this->assertFallbackLocale($data->translations, 'translations');
-        $this->assertFree(Journey::class, $data->slug, 'journey');
+        $this->guard->assertFallbackLocale($data->translations, 'translations');
+        $this->guard->assertSlugFree(Journey::class, $data->slug, 'journey');
 
         $track = Track::where('slug', $data->trackSlug)->sole();
 
@@ -101,8 +111,8 @@ class StructureController
     {
         $journey = Journey::where('slug', $slug)->firstOrFail();
 
-        $this->assertFallbackLocale($data->translations, 'translations');
-        $this->assertSameSlug($data->slug, $slug, 'journey');
+        $this->guard->assertFallbackLocale($data->translations, 'translations');
+        $this->guard->assertSameSlug($data->slug, $slug, 'journey');
 
         $track = Track::where('slug', $data->trackSlug)->sole();
 
@@ -124,8 +134,8 @@ class StructureController
 
     public function storeQuiz(QuizInputData $data): JsonResponse
     {
-        $this->assertFallbackLocale($data->translations, 'translations');
-        $this->assertFree(Quiz::class, $data->slug, 'quiz');
+        $this->guard->assertFallbackLocale($data->translations, 'translations');
+        $this->guard->assertSlugFree(Quiz::class, $data->slug, 'quiz');
 
         $journey = Journey::where('slug', $data->journeySlug)->sole();
 
@@ -152,8 +162,8 @@ class StructureController
     {
         $quiz = Quiz::where('slug', $slug)->firstOrFail();
 
-        $this->assertFallbackLocale($data->translations, 'translations');
-        $this->assertSameSlug($data->slug, $slug, 'quiz');
+        $this->guard->assertFallbackLocale($data->translations, 'translations');
+        $this->guard->assertSameSlug($data->slug, $slug, 'quiz');
 
         $attached = $quiz->questions()->count();
 
@@ -222,6 +232,70 @@ class StructureController
         return $this->showQuizQuestions($slug);
     }
 
+    public function destroyTrack(string $slug): JsonResponse
+    {
+        $track = Track::where('slug', $slug)->withCount(['journeys', 'questions'])->firstOrFail();
+
+        $this->guard->refuseIf(
+            $track->journeys_count > 0,
+            'track',
+            "{$slug} still has {$track->journeys_count} journeys. Delete them first.",
+        );
+
+        $this->guard->refuseIf(
+            $track->questions_count > 0,
+            'track',
+            "{$slug} still owns {$track->questions_count} questions. Move or delete them first.",
+        );
+
+        $track->delete();
+
+        return response()->json(null, 204);
+    }
+
+    public function destroyJourney(string $slug): JsonResponse
+    {
+        $journey = Journey::where('slug', $slug)->withCount('quizzes')->firstOrFail();
+
+        $this->guard->refuseIf(
+            $journey->quizzes_count > 0,
+            'journey',
+            "{$slug} still has a quiz. Delete the quiz first.",
+        );
+
+        $progress = DB::table('user_journey_progress')->where('journey_id', $journey->id)->count();
+
+        $this->guard->refuseIf(
+            $progress > 0,
+            'journey',
+            "{$slug} has progress recorded for {$progress} learners. Unpublish it instead of deleting it.",
+        );
+
+        $journey->delete();
+
+        return response()->json(null, 204);
+    }
+
+    public function destroyQuiz(string $slug): JsonResponse
+    {
+        $quiz = Quiz::where('slug', $slug)->firstOrFail();
+
+        $attempts = DB::table('quiz_attempts')->where('quiz_id', $quiz->id)->count();
+
+        $this->guard->refuseIf(
+            $attempts > 0,
+            'quiz',
+            "{$slug} has {$attempts} attempts against it. Deleting it would delete them too.",
+        );
+
+        DB::transaction(function () use ($quiz) {
+            $quiz->questions()->detach();
+            $quiz->delete();
+        });
+
+        return response()->json(null, 204);
+    }
+
     private function tree(string $trackSlug): TrackTreeData
     {
         $track = Track::where('slug', $trackSlug)
@@ -236,41 +310,5 @@ class StructureController
             ->sole();
 
         return TrackTreeData::fromModel($track);
-    }
-
-    /** @param array<string, mixed> $translations */
-    private function assertFallbackLocale(array $translations, string $field): void
-    {
-        $supported = SetLocale::supportedLocales();
-        $fallback = (string) (config('app.fallback_locale') ?: 'en');
-
-        foreach (array_keys($translations) as $locale) {
-            if (! in_array($locale, $supported, true)) {
-                throw ValidationException::withMessages([$field => "Locale {$locale} is not supported."]);
-            }
-        }
-
-        if (! array_key_exists($fallback, $translations)) {
-            throw ValidationException::withMessages([
-                $field => "The {$fallback} translation is required, because every other locale falls back to it.",
-            ]);
-        }
-    }
-
-    /** @param class-string<\Illuminate\Database\Eloquent\Model> $model */
-    private function assertFree(string $model, string $slug, string $label): void
-    {
-        if ($model::where('slug', $slug)->exists()) {
-            throw ValidationException::withMessages(['slug' => "A {$label} with the slug {$slug} already exists."]);
-        }
-    }
-
-    private function assertSameSlug(string $sent, string $current, string $label): void
-    {
-        if ($sent !== $current) {
-            throw ValidationException::withMessages([
-                'slug' => "A {$label} slug is a stable id and cannot be changed.",
-            ]);
-        }
     }
 }

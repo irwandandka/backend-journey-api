@@ -14,6 +14,7 @@ class TrackInputData extends Data
         public string $colorLight,
         public int $position,
         public bool $isPublished,
+        public ?string $roadmapSlug = null,
         #[LiteralTypeScriptType('Record<string, { name: string; description?: string | null }>')]
         /** @var array<string, array<string, string|null>> */
         public array $translations = [],
@@ -29,6 +30,7 @@ class TrackInputData extends Data
             'colorLight' => ['required', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'position' => ['required', 'integer', 'min:0', 'max:999'],
             'isPublished' => ['required', 'boolean'],
+            'roadmapSlug' => ['nullable', 'string', 'exists:roadmaps,slug'],
             'translations' => ['required', 'array', 'min:1'],
             'translations.*.name' => ['required', 'string', 'min:2', 'max:160'],
             'translations.*.description' => ['nullable', 'string', 'max:2000'],
