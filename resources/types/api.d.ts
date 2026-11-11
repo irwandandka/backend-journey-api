@@ -127,6 +127,61 @@ longestStreak: number,
 lastActiveOn: string | null,
 roles: string[],
 };
+namespace Admin {
+export type QuestionDetailData = {
+key: string,
+trackSlug: string,
+type: string,
+difficulty: string,
+isActive: boolean,
+codeLanguage: string | null,
+version: number,
+quizCount: number,
+tags: string[],
+translations: Record<string, {
+stemMd: string,
+explanationMd: string | null,
+codeSnippet: string | null,
+}>,
+options: {
+isCorrect: boolean,
+translations: Record<string, {
+labelMd: string,
+optionExplanationMd: string | null,
+}>,
+}[],
+history: {
+version: number,
+servedCount: number,
+isCurrent: boolean,
+}[],
+};
+export type QuestionInputData = {
+key: string,
+trackSlug: string,
+type: string,
+difficulty: string,
+translations: Record<string, { stemMd: string; explanationMd?: string | null; codeSnippet?: string | null }>,
+options: Array<{ isCorrect: boolean; translations: Record<string, { labelMd: string; optionExplanationMd?: string | null }> }>,
+tags: string[],
+isActive: boolean,
+codeLanguage: string | null,
+};
+export type QuestionSummaryData = {
+key: string,
+trackSlug: string,
+type: string,
+difficulty: string,
+isActive: boolean,
+version: number,
+optionCount: number,
+quizCount: number,
+stem: string,
+tags: string[],
+missingLocales: string[],
+updatedAt: string | null,
+};
+}
 }
 }
 declare namespace Illuminate {

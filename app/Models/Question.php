@@ -38,7 +38,12 @@ class Question extends Model
 
     public function tags(): BelongsToMany
     {
-        return $this->belongsToMany(Tag::class, 'question_tag');
+        return $this->belongsToMany(Tag::class, 'question_tag')->orderBy('slug');
+    }
+
+    public function quizzes(): BelongsToMany
+    {
+        return $this->belongsToMany(Quiz::class, 'quiz_questions')->withPivot('position');
     }
 
     public function reviewItems(): HasMany

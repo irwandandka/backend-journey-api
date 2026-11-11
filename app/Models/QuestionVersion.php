@@ -28,6 +28,11 @@ class QuestionVersion extends Model
         return $this->hasMany(QuestionOption::class)->orderBy('position');
     }
 
+    public function attemptQuestions(): HasMany
+    {
+        return $this->hasMany(QuizAttemptQuestion::class);
+    }
+
     public function correctOptions(): HasMany
     {
         return $this->options()->where('is_correct', true);
