@@ -151,12 +151,23 @@ class ContentSeeder extends Seeder
     {
         foreach ($trackRows as $trackRow) {
             foreach ($trackRow['journeys'] ?? [] as $journeyRow) {
-                if (! isset($journeyRow['quiz'])) {
-                    continue;
-                }
+                $quizRows = $journeyRow['quizzes']
+                    ?? (isset($journeyRow['quiz']) ? [$journeyRow['quiz']] : []);
 
-                $quizRow = $journeyRow['quiz'];
-                $journey = Journey::where('slug', $journeyRow['slug'])->sole();
+                foreach ($quizRows as $quizRow) {
+                    $this->syncQuiz($journeyRow['slug'], $quizRow, $questions);
+                }
+            }
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $quizRow
+     * @param  array<string, Question>  $questions
+     */
+    private function syncQuiz(string $journeySlug, array $quizRow, array $questions): void
+    {
+        $journey = Journey::where('slug', $journeySlug)->sole();
 
                 $quiz = Quiz::updateOrCreate(
                     ['slug' => $quizRow['slug']],
@@ -181,9 +192,7 @@ class ContentSeeder extends Seeder
                     $pivot[$question->id] = ['position' => $position];
                 }
 
-                $quiz->questions()->sync($pivot);
-            }
-        }
+        $quiz->questions()->sync($pivot);
     }
 
     /** @param list<array<string, mixed>> $rows */

@@ -13,6 +13,8 @@ class Journey extends Model
 
     public const TIERS = ['foundation', 'intermediate', 'advanced', 'deep'];
 
+    public const UNLOCK_RULES = ['sequential', 'tier', 'open'];
+
     protected $fillable = [
         'track_id', 'slug', 'tier', 'unlock_rule', 'position', 'pass_threshold', 'is_published',
     ];

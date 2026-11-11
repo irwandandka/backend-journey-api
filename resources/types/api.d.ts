@@ -128,6 +128,16 @@ lastActiveOn: string | null,
 roles: string[],
 };
 namespace Admin {
+export type JourneyInputData = {
+slug: string,
+trackSlug: string,
+tier: string,
+unlockRule: string,
+position: number,
+passThreshold: number,
+isPublished: boolean,
+translations: Record<string, { title: string; description?: string | null }>,
+};
 export type OverviewData = {
 tracks: {
 total: number,
@@ -210,6 +220,25 @@ stem: string,
 tags: string[],
 missingLocales: string[],
 updatedAt: string | null,
+};
+export type QuizInputData = {
+slug: string,
+journeySlug: string,
+questionCount: number,
+shuffleQuestions: boolean,
+shuffleOptions: boolean,
+position: number,
+timeLimitS: number | null,
+translations: Record<string, { title: string }>,
+};
+export type TrackInputData = {
+slug: string,
+abbreviation: string,
+colorDark: string,
+colorLight: string,
+position: number,
+isPublished: boolean,
+translations: Record<string, { name: string; description?: string | null }>,
 };
 export type TrackTreeData = {
 slug: string,
