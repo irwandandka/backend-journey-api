@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AchievementController;
 use App\Http\Controllers\Api\V1\AttemptController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\InsightController;
 use App\Http\Controllers\Api\V1\JourneyController;
 use App\Http\Controllers\Api\V1\ReviewController;
 use App\Http\Controllers\Api\V1\RoadmapController;
@@ -31,11 +32,21 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('achievements', [AchievementController::class, 'index'])->name('achievements.index');
 
-    Route::get('review', [ReviewController::class, 'summary'])->name('review.summary');
-    Route::post('review/attempts', [ReviewController::class, 'store'])->name('review.store');
+    Route::get('insights', [InsightController::class, 'show'])->name('insights.show');
 
-    Route::post('quizzes/{quizSlug}/attempts', [AttemptController::class, 'store'])->name('attempts.store');
+    Route::get('review', [ReviewController::class, 'summary'])->name('review.summary');
+    Route::post('review/attempts', [ReviewController::class, 'store'])
+        ->middleware('throttle:30,1')
+        ->name('review.store');
+
+    Route::middleware('throttle:30,1')->group(function () {
+        Route::post('quizzes/{quizSlug}/attempts', [AttemptController::class, 'store'])->name('attempts.store');
+        Route::post('attempts/{attemptId}/submit', [AttemptController::class, 'submit'])->name('attempts.submit');
+    });
+
     Route::get('attempts/{attemptId}/questions', [AttemptController::class, 'questions'])->name('attempts.questions');
-    Route::post('attempts/{attemptId}/answers', [AttemptController::class, 'answer'])->name('attempts.answer');
-    Route::post('attempts/{attemptId}/submit', [AttemptController::class, 'submit'])->name('attempts.submit');
+
+    Route::post('attempts/{attemptId}/answers', [AttemptController::class, 'answer'])
+        ->middleware('throttle:120,1')
+        ->name('attempts.answer');
 });
