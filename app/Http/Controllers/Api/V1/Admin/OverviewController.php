@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Admin;
 
+use App\Data\Admin\OverviewData;
 use App\Http\Middleware\SetLocale;
 use App\Models\Journey;
 use App\Models\Question;
@@ -30,24 +31,24 @@ class OverviewController
             ->first();
 
         return response()->json([
-            'data' => [
-                'tracks' => [
+            'data' => new OverviewData(
+                tracks: [
                     'total' => Track::count(),
                     'published' => Track::where('is_published', true)->count(),
                 ],
-                'journeys' => [
+                journeys: [
                     'total' => (int) $journeys->total,
                     'published' => (int) $journeys->published,
                     'withoutQuiz' => (int) $journeys->without_quiz,
                 ],
-                'quizzes' => ['total' => Quiz::count()],
-                'questions' => [
+                quizzes: ['total' => Quiz::count()],
+                questions: [
                     'total' => (int) $questions->total,
                     'active' => (int) $questions->active,
                     'withoutVersion' => (int) $questions->without_version,
                 ],
-                'translationCoverage' => $this->coverage($locales),
-                'emptyJourneys' => Journey::query()
+                translationCoverage: $this->coverage($locales),
+                emptyJourneys: Journey::query()
                     ->whereDoesntHave('quizzes')
                     ->with('track:id,slug')
                     ->orderBy('track_id')
@@ -59,8 +60,9 @@ class OverviewController
                         'position' => $journey->position,
                         'tier' => $journey->tier,
                     ])
-                    ->values(),
-            ],
+                    ->values()
+                    ->all(),
+            ),
         ]);
     }
 

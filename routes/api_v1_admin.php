@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\Admin\OverviewController;
 use App\Http\Controllers\Api\V1\Admin\QuestionController;
 use App\Http\Controllers\Api\V1\Admin\TagController;
+use App\Http\Controllers\Api\V1\Admin\TrackController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +16,8 @@ Route::middleware(['auth:sanctum', 'permission:manage-content'])->group(function
     ])->name('ping');
 
     Route::get('overview', [OverviewController::class, 'show'])->name('overview');
+
+    Route::get('tracks', [TrackController::class, 'index'])->name('tracks.index');
 
     Route::get('tags', [TagController::class, 'index'])->name('tags.index');
     Route::post('tags', [TagController::class, 'store'])->name('tags.store');

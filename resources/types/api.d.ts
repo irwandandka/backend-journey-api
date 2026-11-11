@@ -128,6 +128,36 @@ lastActiveOn: string | null,
 roles: string[],
 };
 namespace Admin {
+export type OverviewData = {
+tracks: {
+total: number,
+published: number,
+},
+journeys: {
+total: number,
+published: number,
+withoutQuiz: number,
+},
+quizzes: {
+total: number,
+},
+questions: {
+total: number,
+active: number,
+withoutVersion: number,
+},
+translationCoverage: {
+locale: string,
+translated: number,
+total: number,
+}[],
+emptyJourneys: {
+slug: string,
+trackSlug: string,
+position: number,
+tier: string,
+}[],
+};
 export type QuestionDetailData = {
 key: string,
 trackSlug: string,
@@ -180,6 +210,29 @@ stem: string,
 tags: string[],
 missingLocales: string[],
 updatedAt: string | null,
+};
+export type TrackTreeData = {
+slug: string,
+name: string,
+abbreviation: string,
+colorDark: string,
+colorLight: string,
+position: number,
+isPublished: boolean,
+questionCount: number,
+journeys: {
+slug: string,
+title: string,
+tier: string,
+unlockRule: string,
+position: number,
+isPublished: boolean,
+passThreshold: number,
+quizzes: {
+slug: string,
+questionCount: number,
+}[],
+}[],
 };
 }
 }

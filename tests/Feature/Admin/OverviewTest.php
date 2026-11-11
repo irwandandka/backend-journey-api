@@ -6,6 +6,7 @@ use App\Models\Tag;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\Feature\Content\ContentFixture;
 use Tests\Feature\Learning\LearningFixture;
 use Tests\TestCase;
@@ -71,6 +72,56 @@ class OverviewTest extends TestCase
             ->assertJsonPath('data.translationCoverage.1.locale', 'id')
             ->assertJsonPath('data.translationCoverage.1.translated', 0)
             ->assertJsonPath('data.translationCoverage.1.total', 1);
+    }
+
+    public function test_tracks_list_with_their_journeys_and_quizzes(): void
+    {
+        $track = LearningFixture::track(LearningFixture::roadmap(), 'indexing');
+        $journey = LearningFixture::journey($track, 'has-quiz', 1);
+        LearningFixture::quiz($journey, questionCount: 2);
+        LearningFixture::journey($track, 'no-quiz', 2);
+
+        $this->actingAs($this->admin)->getJson('/api/v1/admin/tracks')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.slug', 'indexing')
+            ->assertJsonPath('data.0.name', 'Track indexing')
+            ->assertJsonPath('data.0.questionCount', 2)
+            ->assertJsonPath('data.0.isPublished', true)
+            ->assertJsonCount(2, 'data.0.journeys')
+            ->assertJsonPath('data.0.journeys.0.slug', 'has-quiz')
+            ->assertJsonPath('data.0.journeys.0.quizzes.0.slug', 'has-quiz-quiz')
+            ->assertJsonPath('data.0.journeys.1.slug', 'no-quiz')
+            ->assertJsonPath('data.0.journeys.1.quizzes', []);
+    }
+
+    public function test_the_tracks_list_does_not_grow_its_query_count_with_more_journeys(): void
+    {
+        $track = LearningFixture::track(LearningFixture::roadmap(), 'indexing');
+
+        foreach (range(1, 3) as $i) {
+            LearningFixture::journey($track, "j-{$i}", $i);
+        }
+
+        // One warm-up request first: the permission cache is loaded lazily and
+        // would otherwise make the first measurement the expensive one.
+        $this->actingAs($this->admin)->getJson('/api/v1/admin/tracks')->assertOk();
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+        $this->actingAs($this->admin)->getJson('/api/v1/admin/tracks')->assertJsonCount(3, 'data.0.journeys');
+        $withThree = count(DB::getQueryLog());
+
+        foreach (range(4, 14) as $i) {
+            LearningFixture::journey($track, "j-{$i}", $i);
+        }
+
+        DB::flushQueryLog();
+        $this->actingAs($this->admin)->getJson('/api/v1/admin/tracks')->assertJsonCount(14, 'data.0.journeys');
+        $withFourteen = count(DB::getQueryLog());
+        DB::disableQueryLog();
+
+        $this->assertSame($withThree, $withFourteen, "query count grew from {$withThree} to {$withFourteen}");
     }
 
     public function test_tags_list_with_their_usage_and_can_be_created(): void
